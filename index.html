@@ -11,8 +11,6 @@
 
 <header>
   <div class="header-title">Candidature Glast</div>
-
-  <!-- 🔥 BOUTON ADMIN AJOUTÉ -->
   <button class="admin-btn" onclick="openAdmin()">Admin</button>
 </header>
 
@@ -20,89 +18,78 @@
 
   <h1 class="title">Bienvenue sur le système de candidature de <span>Glast</span></h1>
 
-  <!-- ÉTAPE 1 -->
-  <div id="step1" class="card">
+  <!-- 🟦 PAGE 1 -->
+  <div id="page1" class="card">
+
     <h2>Présentation IRL</h2>
 
-    <div class="inputs">
-      <label>Présentation IRL</label>
-      <textarea id="irl"></textarea>
+    <label>Présentation IRL</label>
+    <textarea id="irl"></textarea>
 
-      <label>Pseudo Discord</label>
-      <input id="discord">
+    <label>Pseudo Discord</label>
+    <input id="discord">
 
-      <label>Prénom</label>
-      <input id="prenom">
+    <label>Prénom</label>
+    <input id="prenom">
 
-      <label>Âge</label>
-      <input id="age" type="number">
+    <label>Âge</label>
+    <input id="age" type="number">
 
-      <label>Disponibilités</label>
-      <textarea id="dispos"></textarea>
-    </div>
+    <label>Disponibilités</label>
+    <textarea id="dispos"></textarea>
 
-    <button class="btn-next" onclick="nextStep()">Suivant ➜</button>
+    <button class="btn" onclick="gotoPage2()">Suivant ➜</button>
   </div>
 
 
-  <!-- ÉTAPE 2 -->
-  <div id="step2" class="card" style="display:none;">
+  <!-- 🟩 PAGE 2 -->
+  <div id="page2" class="card" style="display:none;">
+
     <h2>Administration</h2>
 
-    <div class="inputs">
+    <label>Catégorie</label>
+    <select id="categorie">
+      <option value="Staff">🔫・Staff</option>
+      <option value="Community Manager">🛡️・Community Manager</option>
+    </select>
 
-      <label>Catégorie</label>
-      <select id="categorie">
-        <option value="Staff">🔫・Staff</option>
-        <option value="Community Manager">🛡️・Community Manager</option>
-      </select>
+    <label>Motivations</label>
+    <textarea id="motivations"></textarea>
 
-      <label>Motivations</label>
-      <textarea id="motivations"></textarea>
+    <label>Pourquoi vous ?</label>
+    <textarea id="why"></textarea>
 
-      <label>Pourquoi vous ?</label>
-      <textarea id="why"></textarea>
+    <label>Qualités</label>
+    <textarea id="qualites"></textarea>
 
-      <label>Qualités</label>
-      <textarea id="qualites"></textarea>
+    <label>Définition du rôle</label>
+    <textarea id="definition"></textarea>
 
-      <label>Définition du rôle</label>
-      <textarea id="definition"></textarea>
+    <label>Expérience</label>
+    <textarea id="experience"></textarea>
 
-      <label>Expérience</label>
-      <textarea id="experience"></textarea>
+    <label>Ajouts</label>
+    <textarea id="extra"></textarea>
 
-      <label>Ajouts</label>
-      <textarea id="extra"></textarea>
-    </div>
-
-    <div class="btn-row">
-      <button class="btn-back" onclick="prevStep()">⬅ Retour</button>
-      <button class="btn-send" onclick="sendForm()">Envoyer 🚀</button>
+    <div class="btns">
+      <button class="btn-secondary" onclick="gotoPage1()">⬅ Retour</button>
+      <button class="btn" onclick="sendForm()">Envoyer 🚀</button>
     </div>
 
     <p id="status" class="status"></p>
+
   </div>
 
-  <!-- ⭐ PANEL ADMIN AJOUTÉ ⭐ -->
-  <div id="adminPanel" style="
-      display:none;
-      position:fixed;
-      top:50%;
-      left:50%;
-      transform:translate(-50%, -50%);
-      width:90%;
-      max-width:800px;
-      background:#0e0e10;
-      padding:25px;
-      border-radius:12px;
-      box-shadow:0 0 35px rgba(255,0,0,0.35);
-      border:1px solid rgba(255,255,255,0.05);
-      z-index:9999;
-      color:white;
-      max-height:80vh;
-      overflow-y:auto;
-  "></div>
+
+  <!-- 🟥 ADMIN PANEL -->
+  <div id="adminPanel" class="admin-panel" style="display:none;">
+    <h2>Pannel Admin</h2>
+    <p>Liste des candidatures :</p>
+
+    <div id="adminList"></div>
+
+    <button class="btn" style="margin-top:15px;" onclick="clearCandidatures()">🗑 Clear toutes les candidatures</button>
+  </div>
 
 </div>
 
