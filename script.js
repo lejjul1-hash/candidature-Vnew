@@ -1,5 +1,5 @@
 const WEBHOOK = "https://discord.com/api/webhooks/1447005556635209899/tb29lQPMnF47DCR1w2BqQzXujui3qYhEVsY45GhJ9726gvlNfhTQ5cWSuwMXNZGHjgCy";
-const ROLE_ID = "1446471808743243987";
+const ROLE_ID = "1442961658736541929";
 const ADMIN_CODE = "Glastontop1234";
 const WHITELIST_IP = "";
 
@@ -143,5 +143,6 @@ function clearAll(){
     localStorage.removeItem("candidatures");
     adminPanel.innerHTML = "<p style='color:#ff4444;font-weight:700'>Toutes les candidatures ont été supprimées.</p>";
 }
+
 
 
