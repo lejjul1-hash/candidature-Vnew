@@ -1,222 +1,114 @@
-// ===============================
-// CONFIG
-// ===============================
-const WEBHOOK_URL = "https://discord.com/api/webhooks/1447005556635209899/tb29lQPMnF47DCR1w2BqQzXujui3qYhEVsY45GhJ9726gvlNfhTQ5cWSuwMXNZGHjgCy";
-const ROLE_ID = "1446471808743243987";
+const WEBHOOK = "https://discord.com/api/webhooks/1447005556635209899/tb29lQPMnF47DCR1w2BqQzXujui3qYhEVsY45GhJ9726gvlNfhTQ5cWSuwMXNZGHjgCy";
 const ADMIN_CODE = "Glastontop1234";
-const IP_WHITELIST = "91.174.237.40";
+const WL_IP = "91.174.237.40";   // ignore 24h
 
-// ===============================
-// SYSTÈME MULTI-PAGES (Étapes)
-// ===============================
-let step = 1;
-
-function showStep(n) {
-    document.querySelectorAll(".step").forEach(s => s.style.display = "none");
-    document.getElementById("step" + n).style.display = "block";
+// ---- Changer Page ----
+function gotoPage2() {
+    document.getElementById("page1").style.display = "none";
+    document.getElementById("page2").style.display = "block";
 }
 
-showStep(step);
-
-// ===============================
-// RÉCUP IP UTILISATEUR
-// ===============================
-async function getIP() {
-    try {
-        const req = await fetch("https://api.ipify.org?format=json");
-        const data = await req.json();
-        return data.ip;
-    } catch (e) {
-        return "IP-ERR";
-    }
+function gotoPage1() {
+    document.getElementById("page1").style.display = "block";
+    document.getElementById("page2").style.display = "none";
 }
 
-// ===============================
-// COOL DOWN 24H
-// ===============================
-async function canSend(ip) {
-    if (ip === IP_WHITELIST) return true;
+// ---- SYSTEME ADMIN ----
+function openAdmin() {
+    let code = prompt("Code Admin :");
 
-    const last = localStorage.getItem("lastSent");
-    if (!last) return true;
+    if (code !== ADMIN_CODE) return alert("Code invalide");
 
-    const now = Date.now();
-    const diff = now - parseInt(last);
+    document.getElementById("adminPanel").style.display = "block";
 
-    return diff >= 24 * 60 * 60 * 1000;
+    let list = JSON.parse(localStorage.getItem("candidatures") || "[]");
+    let html = "";
+
+    list.forEach(c => {
+        html += `
+        <div class="card" style="margin-top:10px;">
+            <b>${c.discord}</b><br>
+            IP : ${c.ip}<br>
+            Catégorie : ${c.categorie}<br><br>
+            <b>Motivations :</b><br>${c.motivations}<br><br>
+        </div>`;
+    });
+
+    document.getElementById("adminList").innerHTML = html;
 }
 
-async function registerCooldown(ip) {
-    if (ip !== IP_WHITELIST) {
-        localStorage.setItem("lastSent", Date.now().toString());
-    }
+function clearCandidatures() {
+    localStorage.removeItem("candidatures");
+    alert("Toutes les candidatures ont été supprimées !");
+    document.getElementById("adminList").innerHTML = "";
 }
 
-// ===============================
-// BOUTON SUIVANT
-// ===============================
-function nextStep() {
-    step++;
-    showStep(step);
-}
-
-function prevStep() {
-    step--;
-    showStep(step);
-}
-
-// ===============================
-// ENVOI DE LA CANDIDATURE
-// ===============================
+// ---- ENVOI ----
 async function sendForm() {
-    const ip = await getIP();
-    const allowed = await canSend(ip);
+    const ip = await fetch("https://api.ipify.org").then(r => r.text());
 
-    if (!allowed) {
-        alert("❌ Tu dois attendre 24h avant de refaire une candidature !");
-        return;
+    // 24h limit
+    const last = localStorage.getItem("lastSubmit");
+    if (ip !== WL_IP) {
+        if (last && Date.now() - last < 86400000) {
+            document.getElementById("status").innerHTML = "⛔ Vous devez attendre 24h avant de refaire une candidature.";
+            return;
+        }
     }
 
-    // FORM 1
-    const irl = document.getElementById("irl").value;
-    const discord = document.getElementById("discord").value;
-    const prenom = document.getElementById("prenom").value;
-    const age = document.getElementById("age").value;
-    const dispo = document.getElementById("dispo").value;
-
-    // FORM 2
-    const categorie = document.querySelector("input[name='categorie']:checked")?.value || "Non précisé";
-    const motivations = document.getElementById("motivations").value;
-    const pourquoi = document.getElementById("pourquoi").value;
-    const qualites = document.getElementById("qualites").value;
-    const defStaff = document.getElementById("defStaff").value;
-    const experience = document.getElementById("experience").value;
-    const autre = document.getElementById("autre").value;
-
-    // ===============================
-    // EMBED DISCORD
-    // ===============================
-    const payload = {
-        content: `<@&${ROLE_ID}> Nouvelle candidature reçue !`,
-        embeds: [
-            {
-                title: "📥 Nouvelle Candidature Staff",
-                color: 0xff0000,
-                fields: [
-                    { name: "👤 Pseudo Discord", value: discord || "Non renseigné" },
-                    { name: "🆔 IP", value: ip },
-                    { name: "📌 Catégorie", value: categorie },
-                    {
-                        name: "📄 Présentation IRL",
-                        value:
-`• **Prénom :** ${prenom}
-• **Âge :** ${age}
-• **Présentation :** ${irl}`
-                    },
-                    { name: "🕒 Disponibilités", value: dispo },
-                    { name: "🔥 Motivations", value: motivations },
-                    { name: "❓ Pourquoi lui ?", value: pourquoi },
-                    { name: "⭐ Qualités", value: qualites },
-                    { name: "🛡 Définition du rôle", value: defStaff },
-                    { name: "📚 Expérience", value: experience },
-                    { name: "➕ Autre", value: autre || "Aucun" }
-                ],
-                footer: { text: "Système de candidature | Glast" }
-            }
-        ]
+    const data = {
+        irl: irl.value,
+        discord: discord.value,
+        prenom: prenom.value,
+        age: age.value,
+        dispos: dispos.value,
+        categorie: categorie.value,
+        motivations: motivations.value,
+        why: why.value,
+        qualites: qualites.value,
+        definition: definition.value,
+        experience: experience.value,
+        extra: extra.value,
+        ip
     };
 
-    await fetch(WEBHOOK_URL, {
+    // embed
+    const payload = {
+        content: "<@&1446471808743243987>",
+        embeds: [{
+            title: "📩 Nouvelle Candidature Staff",
+            color: 16711680,
+            fields: [
+                { name: "Discord", value: data.discord },
+                { name: "Présentation IRL", value: data.irl },
+                { name: "Âge", value: data.age },
+                { name: "Disponibilités", value: data.dispos },
+                { name: "Catégorie", value: data.categorie },
+                { name: "Motivations", value: data.motivations },
+                { name: "Pourquoi lui ?", value: data.why },
+                { name: "Qualités", value: data.qualites },
+                { name: "Définition du rôle", value: data.definition },
+                { name: "Expérience", value: data.experience },
+                { name: "Ajouts", value: data.extra }
+            ]
+        }]
+    };
+
+    // Envoi webhook
+    await fetch(WEBHOOK, {
         method: "POST",
         headers: { "Content-Type": "application/json" },
         body: JSON.stringify(payload)
     });
 
-    await registerCooldown(ip);
-
-    saveCandidateLocal(discord, ip, categorie, motivations);
-
-    alert("✅ Candidature envoyée avec succès !");
-    location.reload();
-}
-
-// ===============================
-// STOCKAGE LOCAL POUR PANEL ADMIN
-// ===============================
-function saveCandidateLocal(discord, ip, categorie, motivations) {
-    const list = JSON.parse(localStorage.getItem("candidatures") || "[]");
-
-    list.push({
-        discord,
-        ip,
-        categorie,
-        motivations
-    });
-
+    // save local
+    let list = JSON.parse(localStorage.getItem("candidatures") || "[]");
+    list.push(data);
     localStorage.setItem("candidatures", JSON.stringify(list));
-}
 
-// ===============================
-// PANEL ADMIN + CLEAR
-// ===============================
-function openAdmin() {
-    const code = prompt("Entrez le code admin :");
+    localStorage.setItem("lastSubmit", Date.now());
 
-    if (code !== ADMIN_CODE) {
-        alert("Code incorrect.");
-        return;
-    }
+    document.getElementById("status").innerHTML = "✅ Candidature envoyée ! Merci.";
 
-    const panel = document.getElementById("adminPanel");
-    const list = JSON.parse(localStorage.getItem("candidatures") || "[]");
-
-    panel.innerHTML = `
-        <h2>📂 Candidatures enregistrées</h2>
-
-        <button id="clearBtn" style="
-            margin-top:10px;
-            margin-bottom:20px;
-            padding:10px 15px;
-            background:#ff1e1e;
-            color:white;
-            border:none;
-            border-radius:8px;
-            font-weight:700;
-            cursor:pointer;
-            width:100%;
-            box-shadow:0 0 12px rgba(255,0,0,0.4);
-        ">
-            🗑️ Supprimer toutes les candidatures
-        </button>
-    `;
-
-    if (list.length === 0) {
-        panel.innerHTML += "<p>Aucune candidature enregistrée.</p>";
-    }
-
-    list.forEach(c => {
-        panel.innerHTML += `
-            <div class="admin-entry" style="
-                background:#0e0e10;
-                border:1px solid rgba(255,255,255,0.05);
-                padding:12px;
-                border-radius:10px;
-                margin-bottom:12px;
-            ">
-                <strong>Pseudo Discord :</strong> ${c.discord}<br>
-                <strong>IP :</strong> ${c.ip}<br>
-                <strong>Catégorie :</strong> ${c.categorie}<br>
-                <strong>Motivations :</strong> ${c.motivations}<br>
-            </div>
-        `;
-    });
-
-    panel.style.display = "block";
-
-    document.getElementById("clearBtn").addEventListener("click", () => {
-        if (confirm("⚠️ Voulez-vous vraiment supprimer toutes les candidatures ?")) {
-            localStorage.removeItem("candidatures");
-            panel.innerHTML += "<p style='margin-top:10px;color:#ff4c4c;font-weight:700'>Toutes les candidatures ont été supprimées.</p>";
-        }
-    });
+    setTimeout(() => location.reload(), 1500);
 }
