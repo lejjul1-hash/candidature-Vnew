@@ -25,73 +25,89 @@ async function sendForm() {
         }
     }
 
-    const data = {
-        irl: irl.value,
-        discord: discord.value,
-        prenom: prenom.value,
-        age: age.value,
-        dispos: dispos.value,
-        categorie: categorie.value,
-        motivations: motivations.value,
-        why: why.value,
-        qualites: qualites.value,
-        definition: definition.value,
-        experience: experience.value,
-        extra: extra.value
-    };
+const posteFinal =
+    poste.value === "Autre" && autrePoste.value.trim() !== ""
+        ? autrePoste.value
+        : poste.value;
 
-    // EMBED COMPLET
-    const payload = {
-        content: `<@&${ROLE_ID}>`,
-        embeds: [{
-            title: "📥 Nouvelle Candidature Staff",
-            color: 0xff0000,
-            description: `Une nouvelle candidature vient d'être envoyée pour **${data.categorie}**.`,
-            fields: [
-                { name:"👤 Pseudo Discord", value:data.discord },
-                { name:"📌 Catégorie demandée", value:data.categorie },
+const data = {
+    irl: irl.value,
+    discord: discord.value,
+    prenom: prenom.value,
+    age: age.value,
+    dispos: dispos.value,
+    poste: posteFinal,
+    motivations: motivations.value,
+    why: why.value,
+    qualites: qualites.value,
+    definition: definition.value,
+    experience: experience.value,
+    extra: extra.value
+};
 
-                { 
-                    name:"📄 Présentation IRL", 
-                    value:`**Prénom :** ${data.prenom}\n**Âge :** ${data.age}\n**Présentation complète :**\n${data.irl}` 
-                },
+// EMBED COMPLET
+const payload = {
+    content: `<@&${ROLE_ID}>`,
+    embeds: [{
+        title: "📥 Nouvelle Candidature Staff",
+        color: 0xff0000,
+        description: `Une nouvelle candidature vient d'être envoyée pour le poste **${data.poste}**.`,
+        fields: [
+            {
+                name: "👤 Pseudo Discord",
+                value: data.discord || "Non renseigné",
+                inline: true
+            },
+            {
+                name: "📌 Poste demandé",
+                value: data.poste || "Non renseigné",
+                inline: true
+            },
+            {
+                name: "📄 Présentation IRL",
+                value:
+`**Prénom :** ${data.prenom}
+**Âge :** ${data.age}
 
-                { name:"🕒 Disponibilités", value:data.dispos },
+**Présentation :**
+${data.irl || "Non renseignée"}`
+            },
+            {
+                name: "🕒 Disponibilités",
+                value: data.dispos || "Non renseigné"
+            },
+            {
+                name: "🔥 Motivations",
+                value: data.motivations || "Non renseigné"
+            },
+            {
+                name: "❓ Pourquoi lui ?",
+                value: data.why || "Non renseigné"
+            },
+            {
+                name: "⭐ Qualités",
+                value: data.qualites || "Non renseigné"
+            },
+            {
+                name: "🛡 Définition du rôle",
+                value: data.definition || "Non renseigné"
+            },
+            {
+                name: "📚 Expérience",
+                value: data.experience || "Aucune"
+            },
+            {
+                name: "➕ Informations supplémentaires",
+                value: data.extra || "Aucune"
+            }
+        ],
+        footer: {
+            text: "💼 Système de candidature - NovaWorld"
+        },
+        timestamp: new Date()
+    }]
+};
 
-                { 
-                    name:"🔥 Motivations", 
-                    value:data.motivations || "Non renseigné"
-                },
-
-                { 
-                    name:"❓ Pourquoi lui ?", 
-                    value:data.why || "Non renseigné"
-                },
-
-                { 
-                    name:"⭐ Qualités", 
-                    value:data.qualites || "Non renseigné"
-                },
-
-                { 
-                    name:"🛡 Définition du rôle moderateur/cm", 
-                    value:data.definition || "Non renseigné"
-                },
-
-                { 
-                    name:"📚 Expérience", 
-                    value:data.experience || "Aucune"
-                },
-
-                { 
-                    name:"➕ Informations supplémentaires", 
-                    value:data.extra || "Aucune"
-                }
-            ],
-            footer: { text: "💼 Système de candidature - NewVibe" },
-            timestamp: new Date()
-        }]
-    };
 
     await fetch(WEBHOOK, {
         method:"POST",
@@ -146,6 +162,16 @@ function clearAll(){
     localStorage.removeItem("candidatures");
     adminPanel.innerHTML = "<p style='color:#ff4444;font-weight:700'>Toutes les candidatures ont été supprimées.</p>";
 }
+
+function toggleAutrePoste() {
+    const select = document.getElementById("poste");
+    const box = document.getElementById("autrePosteBox");
+
+    if (!select || !box) return;
+
+    box.style.display = select.value === "Autre" ? "block" : "none";
+}
+
 
 
 
