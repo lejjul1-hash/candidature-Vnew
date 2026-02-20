@@ -89,7 +89,7 @@ ${data.irl || "Non renseignée"}`
                 value: data.qualites || "Non renseigné"
             },
             {
-                name: "🛡 Définition du rôle",
+                name: "🛡 Définition du rôle moderateur/cm",
                 value: data.definition || "Non renseigné"
             },
             {
@@ -102,7 +102,7 @@ ${data.irl || "Non renseignée"}`
             }
         ],
         footer: {
-            text: "💼 Système de candidature - Vnew"
+            text: "💼 Système de candidature - Vanity"
         },
         timestamp: new Date()
     }]
@@ -171,6 +171,7 @@ function toggleAutrePoste() {
 
     box.style.display = select.value === "Autre" ? "block" : "none";
 }
+
 
 
 
